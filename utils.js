@@ -45,3 +45,86 @@ export function getRandomEmoji() {
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+function numberToWords(n) {
+    if (n === 0) return 'Zero';
+
+    const single_digits = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const double_digits = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const below_hundred = ['Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function translate(num) {
+        let word = "";
+        if (num < 10) {
+            word = single_digits[num] + ' ';
+        } else if (num < 20) {
+            word = double_digits[num - 10] + ' ';
+        } else {
+            word = 'an undetermined amount of'
+        }
+        return word;
+    }
+
+    let result = translate(n);
+    return result.trim();
+}
+
+
+export function getRandomTea() {
+  const teaList = [
+    'jasmine tea',
+    'earl grey tea',
+    'chamomile tea',
+    'peppermint tea',
+    'arsenic'
+  ]
+  return teaList[Math.floor(Math.random() * teaList.length)];
+}
+
+//to-do: set interaction to different name, find variable alternatives, refactor reply to message when found
+export async function scheduleEvent(interaction, role, eventName, daysBefore, channelName) {
+    const guild = interaction.guild;
+    const events = await guild.scheduledEvents.fetch();
+    const eventsArray = Array.from(events.values()) || [];
+    const numberToWords = numberToWords(daysBefore);
+    console.log('events', events);
+    let fetchedEvent;
+    eventsArray.forEach((event) => {
+        console.log('event', event);
+        if (event.name === eventName) fetchedEvent = event;
+    })
+    console.log('guild', guild);
+    const channel = guild.channels.cache.find(channel => channel.name === channelName);
+    const channelId = channel.id;
+
+    try {
+        if (daysBefore % 1 !== 0) return interaction.reply({ content: "I can't calculate fractions of a day. That's a little too much guesswork. Please enter a number of days.", ephemeral: true });
+
+        // Calculate 3 days before
+        const milliseconds = daysBefore * 24 * 60 * 60 * 1000; // milliseconds in 3 days
+        const eventTimestamp = fetchedEvent.scheduledStartTimestamp;
+        const reminderTimestamp = eventTimestamp - milliseconds;
+
+        if (reminderTimestamp < Date.now()) {
+            return interaction.reply({ content: "That date is in the past!", ephemeral: true });
+        }
+
+        const reminderMessage = `🔔 Reminder: ${role} have a session in ${numberToWords} days. Please react to this message if you are able to attend. If you do not, I will address you directly tomorrow.
+            \nEvent Details:
+            \nEvent Date: <t:${Math.floor(eventTimestamp / 1000)}:F> (<t:${Math.floor(eventTimestamp / 1000)}:R>).
+            \nEvent Name: ${eventName}
+            \nGroup: ${role}
+            \nRecap Link: (coming soon)`;
+
+        setTimeout(() => {
+            interaction.client.channels.cache.get(channelId)?.send(reminderMessage)
+                .then(() => console.log(`Reminder sent for event ${eventName}`))
+                .catch(console.error);
+        }, eventTimestamp - Date.now()); // Delay from *now* until the scheduled time
+
+        await interaction.reply({ content: `Reminder scheduled for <t:${Math.floor(reminderTimestamp / 1000)}:F> (<t:${Math.floor(reminderTimestamp / 1000)}:R>).`, ephemeral: true });
+    } catch (error) {
+        console.error(error);
+        interaction.reply({ content: "Something went wrong scheduling the reminder.", ephemeral: true });
+    }
+}

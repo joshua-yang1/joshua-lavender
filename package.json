@@ -16,7 +16,11 @@
   "author": "Shay DeWael",
   "license": "MIT",
   "dependencies": {
+    "@discordjs/opus": "^0.2.1",
     "discord-interactions": "^4.0.0",
+    "discord-player": "^7.1.0",
+    "discord-player-googlevideo": "^0.2.1",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2"
   },
