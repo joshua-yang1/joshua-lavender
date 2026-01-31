@@ -12,15 +12,10 @@ export const data = new SlashCommandBuilder()
     )
     .addIntegerOption(option =>
         option.setName('days').setDescription('The number of days before the session to send the first reminder').setRequired(true)
-    )
-    .addChannelOption(option =>
-        option.setName('channel').setDescription('The channel to post the reminder in').setRequired(true)
-    )
-;
+    );
 export async function execute(interaction) {
     const role = interaction.options.getRole('role');
-    const eventName = interaction.options.getString('event'); // e.g., "2026-02-15T14:00:00Z"
+    const eventName = interaction.options.getString('event');
     const daysBefore = interaction.options.getInteger('days');
-    const channelName = interaction.options.getChannel('channel'); // The channel to send the reminder in
     scheduleEvent(interaction, role, eventName, daysBefore, channelName);
 }

@@ -1,6 +1,4 @@
 // Require the necessary discord.js classes
-import fs from 'node:fs';
-import path from 'node:path';
 import { 
   Client,
   Collection,
@@ -15,13 +13,11 @@ import {
   PermissionsBitField
 } from 'discord.js';
 import 'dotenv/config';
-import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
 import  { Player } from 'discord-player';
 import  { DefaultExtractors } from '@discord-player/extractor';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
-import * as savedEvents from './savedEvents.json' with { type: "json" };
-import { scheduleEvent } from './utils.js';
+import savedEvents from './savedEvents.json' with { type: "json" };
+import { deployCommandsToServer, scheduleEventOnBoot, writeCommandsToClient } from './utils.js';
 
 const token = process.env.DISCORD_TOKEN;
 const serverId = process.env.SERVER_ID;
@@ -50,11 +46,11 @@ const client = new Client({
 // It makes some properties non-nullable.
 client.once(Events.ClientReady, async (readyClient) => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag} on port ${PORT}`);
-
+  console.log(savedEvents);
   //reschedules any events in savedEvents.json in case of a bot restart
-  // savedEvents.forEach((se) => {
-  //   scheduleEvent(se.interaction, )
-  // })
+  savedEvents.forEach((se) => {
+    scheduleEventOnBoot(client, se.role, se.event, se.days);
+  })
 
   //sets up music player
   try {
@@ -224,27 +220,8 @@ client.once(Events.ClientReady, async (readyClient) => {
 
 client.commands = new Collection();
 
-const fileName = fileURLToPath(import.meta.url);
-const require = createRequire(import.meta.url);
-const dirName = path.dirname(fileName);
-const foldersPath = path.join(dirName, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
-
-
-for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.js'));
-	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
-		// Set a new item in the Collection with the key as the command name and the value as the exported module
-		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
-		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
-		}
-	}
-}
+writeCommandsToClient(client);
+deployCommandsToServer();
 
 // Log in to Discord with your client's token
 client.login(token);
