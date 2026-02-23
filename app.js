@@ -126,6 +126,48 @@ client.once(Events.ClientReady, async (readyClient) => {
     }
   });
 
+  client.on('voiceStateUpdate', async (oldState, newState) => {
+    //add role to return user to their original nickname after leaving voice
+    const joiner = newState.member;
+    const currentNickname = joiner.user.tag;
+    const guild = joiner.guild;
+    const stashRole = guild.roles.cache.find(role => role.name === `[stash]${currentNickname}`); 
+    if (stashRole) {
+      guild.roles.create({name: `[stash]${currentNickname}`})
+      .then(role => {
+        console.log(`Created role ${role.name} for ${currentNickname}.`)
+        joiner.roles.add(role);
+      })
+      .catch(console.error);
+    }
+
+    //check if user has role with campaign role tag matching voice channel's role tag, then set nickname
+    const joinedChannelName = newState.channel.name;
+    const joinerRoles = joiner.roles.cache;
+    const joinedChannelTag = joinedChannelName.substring(0, 4);
+    const joinerTaggedRole = joinerRoles.find(role => role.name.substring(0, 4) === joinedChannelTag);
+    if (joinerTaggedRole) {
+      try {
+        await joiner.setNickname(joinerTaggedRole);
+        console.log(`Set ${joiner.user.tag} to "${joinerTaggedRole}"`)
+      } catch (error) {
+        console.error(`Failed to set ${joiner.user.tag}'s nickname: `, error);
+      }
+    }
+
+    const leftChannelName = oldState.channel.name;
+    const leftChannelTag = leftChannelName.substring(0, 4);
+    const leaverTaggedRole = joinerRoles.find(role => role.name.substring(0, 4) === leftChannelTag);
+    if (leaverTaggedRole) {
+      try {
+        await joiner.setNickname(joinerTaggedRole);
+        console.log(`Set ${joiner.user.tag} to "${joinerTaggedRole}"`)
+      } catch (error) {
+        console.error(`Failed to set ${joiner.user.tag}'s nickname: `, error);
+      }
+    }
+  });
+
   //add emoji-related commands here. choppingblock censors posts by deleting the original and reposting it with spoiler
   client.on(Events.MessageReactionAdd, async (messageReaction, user) => {
     if (messageReaction.emoji.name === 'choppingblock') {
