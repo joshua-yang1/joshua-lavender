@@ -53,7 +53,7 @@ for (let i = 0; i < allowedServers.length; i++) {
     console.log(savedEvents);
     //reschedules any events in savedEvents.json in case of a bot restart
     savedEvents.forEach((se) => {
-      scheduleEventOnBoot(client, se.role, se.event, se.days);
+      scheduleEventOnBoot(client, se.role, se.event, se.days, allowedServers[i]);
     })
 
     //sets up music player

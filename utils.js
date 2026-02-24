@@ -141,20 +141,24 @@ export async function scheduleEvent(interaction, role, eventName, daysBefore) {
 }
 
 //to-do: set interaction to different name, find variable alternatives, refactor reply to message when found
-export async function scheduleEventOnBoot(client, role, eventName, daysBefore) {
-    const serverId = process.env.SERVER_ID;
+export async function scheduleEventOnBoot(client, role, eventName, daysBefore, serverId) {
     const guild = client.guilds.cache.get(serverId);
     const events = await guild.scheduledEvents.fetch();
     const eventsArray = Array.from(events.values());
+    console.log(`events array for ${serverId}: `,eventsArray);
+    if (eventsArray.length === 0) return;
     const wordNumber = numberToWords(daysBefore);
     let fetchedEvent;
+    let channel;
     eventsArray.forEach((event) => {
-        if (event.name === eventName) fetchedEvent = event;
+      console.log('event', event);
+        if (event.name === eventName) {
+          fetchedEvent = event;
+          console.log('fetched event: ',fetchedEvent);
+          channel = guild.channels.cache.get(fetchedEvent.channelId)
+          console.log('channel', channel);
+        }
     })
-    // console.log('channels cache', guild.channels.cache);
-    // console.log
-    const channel = guild.channels.cache.get(fetchedEvent.channelId)
-    console.log('channel', channel);
 
     try {
         if (daysBefore % 1 !== 0) return channel.send({ 
@@ -198,8 +202,8 @@ const foldersPath = path.join(dirName, 'commands');
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.APP_ID;
 const guildIds = process.env.SERVER_ID;
-const allowedServers = guildIds ? guildIds.split(',') : []
-
+const allowedServers = guildIds ? guildIds.split(',') : [];
+console.log('allowedServers', allowedServers);
 
 export async function writeCommandsToClient(client) {
   const commandFolders = fs.readdirSync(foldersPath);
