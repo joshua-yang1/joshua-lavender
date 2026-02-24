@@ -197,7 +197,8 @@ const dirName = path.dirname(fileName);
 const foldersPath = path.join(dirName, 'commands');
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.APP_ID;
-const guildId = process.env.SERVER_ID;
+const guildIds = process.env.SERVER_ID;
+const allowedServers = guildIds ? guildIds.split(',') : []
 
 
 export async function writeCommandsToClient(client) {
@@ -248,12 +249,13 @@ export async function deployCommandsToServer() {
   (async () => {
     try {
       console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
-      // The put method is used to fully refresh all commands in the guild with the current set
-      const data = await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commands });
-
-      console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-      console.log(data);
+      allowedServers.forEach(async (server) => {
+        // The put method is used to fully refresh all commands in the guild with the current set
+        const data = await rest.put(Routes.applicationGuildCommands(clientId, server), { body: commands });
+  
+        console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+        console.log(data);
+      })
     } catch (error) {
       // And of course, make sure you catch and log any errors!
       console.error(error);
