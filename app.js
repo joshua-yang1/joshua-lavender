@@ -105,6 +105,7 @@ for (let i = 0; i < allowedServers.length; i++) {
     //slash command handler
     client.on(Events.InteractionCreate, async (interaction) => {
       if (!interaction.isChatInputCommand()) return;
+      if (interaction.guildId !== allowedServers[i]) return;
       const command = await interaction.client.commands.get(interaction.commandName);
 
       if (!command) {

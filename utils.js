@@ -144,7 +144,7 @@ export async function scheduleEvent(interaction, role, eventName, daysBefore) {
 export async function scheduleEventOnBoot(client, savedEvent, serverId) {
     const serverName = savedEvent.serverName;
     const role = savedEvent.role;
-    const eventName = savedEvent.eventName;
+    const eventName = savedEvent.event;
     const daysBefore = savedEvent.daysBefore;
     const guild = client.guilds.cache.get(serverId);
     if (guild.name !== serverName) return;
@@ -156,7 +156,6 @@ export async function scheduleEventOnBoot(client, savedEvent, serverId) {
     let fetchedEvent;
     let channel;
     eventsArray.forEach((event) => {
-      console.log('event', event);
         if (event.name === eventName) {
           fetchedEvent = event;
           console.log('fetched event: ',fetchedEvent);
@@ -177,7 +176,7 @@ export async function scheduleEventOnBoot(client, savedEvent, serverId) {
         const reminderTimestamp = eventTimestamp - milliseconds;
 
         if (reminderTimestamp < Date.now()) {
-            return channel.send({ content: "That date is in the past!", flags: MessageFlags.Ephemeral, });
+            return channel.send({ content: "That date is in the past!", flags: MessageFlags.Ephemeral });
         }
 
         const reminderMessage = `🔔 Reminder: ${role} have a session in ${wordNumber} days. Please react to this message if you are able to attend. If you do not, I will address you directly tomorrow.
@@ -196,7 +195,7 @@ export async function scheduleEventOnBoot(client, savedEvent, serverId) {
         await channel.send({ content: `Reminder scheduled for <t:${Math.floor(reminderTimestamp / 1000)}:F> (<t:${Math.floor(reminderTimestamp / 1000)}:R>).`, flags: MessageFlags.Ephemeral, });
     } catch (error) {
         console.error(error);
-        channel.send({ content: "Something went wrong scheduling the reminder.", flags: MessageFlags.Ephemeral, });
+        channel.send({ content: "Something went wrong scheduling the reminder.", flags: MessageFlags.Ephemeral });
     }
 }
 
