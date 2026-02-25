@@ -141,8 +141,13 @@ export async function scheduleEvent(interaction, role, eventName, daysBefore) {
 }
 
 //to-do: set interaction to different name, find variable alternatives, refactor reply to message when found
-export async function scheduleEventOnBoot(client, role, eventName, daysBefore, serverId) {
+export async function scheduleEventOnBoot(client, savedEvent, role, eventName, daysBefore, serverId) {
+    const serverName = savedEvent.serverName;
+    const role = savedEvent.role;
+    const eventName = savedEvent.eventName;
+    const daysBefore = savedEvent.daysBefore;
     const guild = client.guilds.cache.get(serverId);
+    if (guild.name !== serverName) return;
     const events = await guild.scheduledEvents.fetch();
     const eventsArray = Array.from(events.values());
     console.log(`events array for ${serverId}: `,eventsArray);
@@ -328,9 +333,10 @@ export async function castSpell(interaction) {
       if (confirmation.customId === 'roll') {
           const passFailString = rolledNumber >= parseInt(spellDc) ? 'passed' : 'failed'
           await interaction.followUp({
-            content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw. ${dice[rolledNumber - 1]}`
+            content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}. ${dice[rolledNumber - 1]}`
           }).then(() => { 
             challenge.edit({components: []});
+            challenge.reply(`You passed this one with a ${rolledNumber}! Good save.`);
           })
       }
   } catch (error) {
@@ -339,7 +345,7 @@ export async function castSpell(interaction) {
         content: `${target} has not rolled their saving throw in time and has failed, taking ${spell}'s full effects. ${dice[0]}`,
       });
       challenge.edit({
-        content: 'Looks like you failed to respond to this one in time.',
+        content: `~~Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).~~\n\nLooks like you failed to respond to this one in time.`,
         components: []
       });
   }

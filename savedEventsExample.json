@@ -1,0 +1,18 @@
+[
+    {
+        "note": "if you're going to copy/paste this into your own savedEvents.json folder, delete this node first.",
+        "instructions1": "format of json file looks like this:",
+        "instructions2": "serverName: the name of your server,",
+        "instructions3": "role: the name of the role invited to the event,",
+        "instructions4": "event: the name of the event itself,",
+        "instructions5": "days: the number of days in advance.",
+        "instructions6": "create your own file named savedEvents.json, copy this object structure, and put all of your event objects in an unnamed array.",
+        "instructions7": "reminder should run the number of days before at exactly the hour the event is scheduled for."
+    },
+    {
+        "serverName":"Pathfinder+DnD",
+        "role":"the-god-eaters",
+        "event":"God Eaters Campaign",
+        "days":"3"
+    }
+]
