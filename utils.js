@@ -156,7 +156,7 @@ export async function scheduleEventOnBoot(client, savedEvent, serverId) {
     let fetchedEvent;
     let channel;
     eventsArray.forEach((event) => {
-        if (event.name === eventName) {
+        if (event.name == eventName) {
           fetchedEvent = event;
           console.log('fetched event: ',fetchedEvent);
           channel = guild.channels.cache.get(fetchedEvent.channelId)
