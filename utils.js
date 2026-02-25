@@ -203,7 +203,6 @@ const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.APP_ID;
 const guildIds = process.env.SERVER_ID;
 const allowedServers = guildIds ? guildIds.split(',') : [];
-console.log('allowedServers', allowedServers);
 
 export async function writeCommandsToClient(client) {
   const commandFolders = fs.readdirSync(foldersPath);
@@ -228,6 +227,7 @@ export async function writeCommandsToClient(client) {
 export async function deployCommandsToServer() {
   const commands = []
   const commandFolders = fs.readdirSync(foldersPath);
+  console.log('allowedServers', allowedServers);
 
   for (const folder of commandFolders) {
     // Grab all the command files from the commands directory you created earlier
