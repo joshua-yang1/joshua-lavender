@@ -141,7 +141,7 @@ export async function scheduleEvent(interaction, role, eventName, daysBefore) {
 }
 
 //to-do: set interaction to different name, find variable alternatives, refactor reply to message when found
-export async function scheduleEventOnBoot(client, savedEvent, role, eventName, daysBefore, serverId) {
+export async function scheduleEventOnBoot(client, savedEvent, serverId) {
     const serverName = savedEvent.serverName;
     const role = savedEvent.role;
     const eventName = savedEvent.eventName;
