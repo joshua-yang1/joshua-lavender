@@ -327,16 +327,16 @@ export async function castSpell(interaction) {
       if (confirmation.customId === 'roll') {
           const rolledNumber = Math.floor(Math.random() * 20) + 1;
           const passFailString = rolledNumber >= parseInt(spellDc) ? 'passed' : 'failed'
-          await interaction.channel.send({
-              content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw. ${dice[rolledNumber - 1]}`
-          }).then(() => {
-              challenge.edit({components: []});
+          await interaction.followUp({
+            content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw. ${dice[rolledNumber - 1]}`
+          }).then(() => { 
+            challenge.edit({components: []});
           })
       }
   } catch (error) {
       console.log('coward: ', error);
-      await interaction.channel.send({
-        content: `${target} has not rolled their saving throw in time and has failed, taking ${spell}'s full effects. ${dice[rolledNumber - 1]}`,
+      await interaction.followUp({
+        content: `${target} has not rolled their saving throw in time and has failed, taking ${spell}'s full effects. ${dice[0]}`,
       });
       challenge.edit({
         content: 'Looks like you failed to respond to this one in time.',
