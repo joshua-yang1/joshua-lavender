@@ -309,6 +309,7 @@ export async function castSpell(interaction) {
   const spell = interaction.options.getString('spell');
   const level = interaction.options.getString('level');
   const spellDc = spellDcs.find(dc => dc.name === level).value;
+  const rolledNumber = Math.floor(Math.random() * 20) + 1;
   console.log(level);
   const target = interaction.options.getUser('target');
   await interaction.reply({
@@ -325,7 +326,6 @@ export async function castSpell(interaction) {
       }
       const confirmation = await challenge.awaitMessageComponent({ filter, time: 60_000 });
       if (confirmation.customId === 'roll') {
-          const rolledNumber = Math.floor(Math.random() * 20) + 1;
           const passFailString = rolledNumber >= parseInt(spellDc) ? 'passed' : 'failed'
           await interaction.followUp({
             content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw. ${dice[rolledNumber - 1]}`
