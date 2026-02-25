@@ -330,17 +330,17 @@ export async function castSpell(interaction) {
           await interaction.channel.send({
               content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw. ${dice[rolledNumber - 1]}`
           }).then(() => {
-              challenge.edit({
-                content: 'Looks like you failed to respond to this one in time.',
-                components: []
-              });
-          }).catch(console.error);
+              challenge.edit({components: []});
+          })
       }
   } catch (error) {
       console.log('coward: ', error);
       await interaction.channel.send({
         content: `${target} has not rolled their saving throw in time and has failed, taking ${spell}'s full effects. ${dice[rolledNumber - 1]}`,
       });
-      challenge.edit({components: []});
+      challenge.edit({
+        content: 'Looks like you failed to respond to this one in time.',
+        components: []
+      });
   }
 }
