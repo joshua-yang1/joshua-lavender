@@ -329,7 +329,7 @@ export async function castSpell(interaction) {
       const filter = (i) => {
           return i.user.id === target.id;
       }
-      const confirmation = await challenge.awaitMessageComponent({ filter, time: 60_000 });
+      const confirmation = await challenge.awaitMessageComponent({ filter, time: 1000 * 60 * 60 });
       if (confirmation.customId === 'roll') {
           const passFailString = rolledNumber >= parseInt(spellDc) ? 'passed' : 'failed'
           await interaction.followUp({
