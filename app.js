@@ -104,8 +104,12 @@ for (let i = 0; i < allowedServers.length; i++) {
 
     //slash command handler
     client.on(Events.InteractionCreate, async (interaction) => {
-      if (!interaction.isChatInputCommand()) return;
-      if (interaction.guildId !== allowedServers[i]) return;
+      if (!interaction.isChatInputCommand() && !interaction.isContextMenuCommand()) {
+        return;
+      } 
+      if (interaction.guildId !== allowedServers[i]) {
+        return;
+      }
       const command = await interaction.client.commands.get(interaction.commandName);
 
       if (!command) {
@@ -191,93 +195,93 @@ for (let i = 0; i < allowedServers.length; i++) {
 
     //add emoji-related commands here. choppingblock censors posts by deleting the original and reposting it with spoiler
     client.on(Events.MessageReactionAdd, async (messageReaction, user) => {
-      if (messageReaction.emoji.name === 'choppingblock') {
-        // Permission check
-        let member;
-        const guild = client.guilds.cache.get(allowedServers[i]);
-        async function getMember(guild, memberId) {
-            try {
-                const member = await guild.members.fetch(memberId);
-                console.log(`Fetched member: ${member.user.tag}`);
-                return member;
-            } catch (error) {
-                console.error('Could not fetch member:', error);
-                return null;
-            }
-        }
-        if (guild) {
-          member = await getMember(guild, user.id);
-        }
-        console.log('member', member);
-        if (!member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
-          return interaction.reply({ content: 'You do not have permission to manage messages.', ephemeral: true });
-        }
-        const confirm = new ButtonBuilder().setCustomId('confirm').setLabel('Confirm Spoiler').setStyle(ButtonStyle.Danger);
-        const cancel = new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary);
-        const row = new ActionRowBuilder().addComponents(cancel, confirm);
-        const message = await messageReaction.message.fetch();
-        const currentChannel = await message.channel.fetch();
-        let messageContent = message.content;
-        let messageAttachments = Array.from(message.attachments.values()) || [];
-        // let messageEmbeds = message.embeds;
-        let spoileredAttachments = [];
-        // let formattedEmbeds = [];
-        messageAttachments.forEach((attachment) => {
-          const spoileredAttachment = new AttachmentBuilder(attachment.url, { name: `SPOILER_${attachment.name}` });
-          spoileredAttachments.push(spoileredAttachment);
-        })
-        // console.log('embeds', messageEmbeds);
-        // messageEmbeds.forEach((embed) => {
-        //   let ytURL;
-        //   if (embed.data.provider.name === 'YouTube') ytURL = `https://img.youtube.com/vi/${embed.data.url.replace('https://www.youtube.com/watch?v=', '')}/hqdefault.jpg`
-        //   const formattedEmbed = new EmbedBuilder()
-        //     .setTitle(embed.data.title)
-        //     .setURL(embed.data.url)
-        //     .setImage(embed.data.provider.name === 'YouTube' ? ytURL : embed.data.thumbnail.url)
-        //     .setDescription(embed.data.description);
-        //   formattedEmbeds.push(formattedEmbed);
-        // })
-        const confirmCensor = await currentChannel.send({
-            content: 'Censor this post?',
-            components: [row],
-            flags: MessageFlags.Ephemeral,
-            withResponse: true,
-          }
-        ); 
-        async function attemptDelete() {
-          if (confirmCensor.channel) {
-            await confirmCensor.delete();
-          } else {
-            console.log('for whatever reason there is no channel');
-          }
-        }
-        try {
-          const confirmation = await confirmCensor.awaitMessageComponent({ time: 60_000 });
-          if (confirmation.customId === 'confirm') {
-            await message.reply({
-              content: `|| ${messageContent} ||
-                \nOh, dear. Let's cover that up. Can't have anything like that around my paying customers.`,
-              files: spoileredAttachments,
-              // embeds: formattedEmbeds,
-            }).then(() => {
-                confirmCensor.delete();
-                message.delete();
-              })
-                .catch(console.error);
-          } else if (confirmation.customId === 'cancel') {
-            await messageReaction.users.remove(user.id);
-            await confirmCensor.edit({ content: 'We\'ve chosen to leave it, then. That\'s alright by me. I just thought I\'d check.', components: [] });
-            console.log('confirmCensor channel', confirmCensor.channel.name, 'currentChannel', currentChannel.name);
-            // setTimeout(confirmCensor.delete, 8000);
-            setTimeout(attemptDelete, 8000);
-          }
-        } catch (error) {
-          console.log('reason why this still happens: ', error);
-          await messageReaction.users.remove(user.id);
-          await confirmCensor.edit('...Alright, well if you\'d like to revisit this, let me know.');
-          setTimeout(attemptDelete, 8000);
-        }
-      }
+      // if (messageReaction.emoji.name === 'choppingblock') {
+      //   // Permission check
+      //   let member;
+      //   const guild = client.guilds.cache.get(allowedServers[i]);
+      //   async function getMember(guild, memberId) {
+      //       try {
+      //           const member = await guild.members.fetch(memberId);
+      //           console.log(`Fetched member: ${member.user.tag}`);
+      //           return member;
+      //       } catch (error) {
+      //           console.error('Could not fetch member:', error);
+      //           return null;
+      //       }
+      //   }
+      //   if (guild) {
+      //     member = await getMember(guild, user.id);
+      //   }
+      //   console.log('member', member);
+      //   if (!member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+      //     return interaction.reply({ content: 'You do not have permission to manage messages.', ephemeral: true });
+      //   }
+      //   const confirm = new ButtonBuilder().setCustomId('confirm').setLabel('Confirm Spoiler').setStyle(ButtonStyle.Danger);
+      //   const cancel = new ButtonBuilder().setCustomId('cancel').setLabel('Cancel').setStyle(ButtonStyle.Secondary);
+      //   const row = new ActionRowBuilder().addComponents(cancel, confirm);
+      //   const message = await messageReaction.message.fetch();
+      //   const currentChannel = await message.channel.fetch();
+      //   let messageContent = message.content;
+      //   let messageAttachments = Array.from(message.attachments.values()) || [];
+      //   // let messageEmbeds = message.embeds;
+      //   let spoileredAttachments = [];
+      //   // let formattedEmbeds = [];
+      //   messageAttachments.forEach((attachment) => {
+      //     const spoileredAttachment = new AttachmentBuilder(attachment.url, { name: `SPOILER_${attachment.name}` });
+      //     spoileredAttachments.push(spoileredAttachment);
+      //   })
+      //   // console.log('embeds', messageEmbeds);
+      //   // messageEmbeds.forEach((embed) => {
+      //   //   let ytURL;
+      //   //   if (embed.data.provider.name === 'YouTube') ytURL = `https://img.youtube.com/vi/${embed.data.url.replace('https://www.youtube.com/watch?v=', '')}/hqdefault.jpg`
+      //   //   const formattedEmbed = new EmbedBuilder()
+      //   //     .setTitle(embed.data.title)
+      //   //     .setURL(embed.data.url)
+      //   //     .setImage(embed.data.provider.name === 'YouTube' ? ytURL : embed.data.thumbnail.url)
+      //   //     .setDescription(embed.data.description);
+      //   //   formattedEmbeds.push(formattedEmbed);
+      //   // })
+      //   const confirmCensor = await currentChannel.send({
+      //       content: 'Censor this post?',
+      //       components: [row],
+      //       flags: MessageFlags.Ephemeral,
+      //       withResponse: true,
+      //     }
+      //   ); 
+      //   async function attemptDelete() {
+      //     if (confirmCensor.channel) {
+      //       await confirmCensor.delete();
+      //     } else {
+      //       console.log('for whatever reason there is no channel');
+      //     }
+      //   }
+      //   try {
+      //     const confirmation = await confirmCensor.awaitMessageComponent({ time: 60_000 });
+      //     if (confirmation.customId === 'confirm') {
+      //       await message.reply({
+      //         content: `|| ${messageContent} ||
+      //           \nOh, dear. Let's cover that up. Can't have anything like that around my paying customers.`,
+      //         files: spoileredAttachments,
+      //         // embeds: formattedEmbeds,
+      //       }).then(() => {
+      //           confirmCensor.delete();
+      //           message.delete();
+      //         })
+      //           .catch(console.error);
+      //     } else if (confirmation.customId === 'cancel') {
+      //       await messageReaction.users.remove(user.id);
+      //       await confirmCensor.edit({ content: 'We\'ve chosen to leave it, then. That\'s alright by me. I just thought I\'d check.', components: [] });
+      //       console.log('confirmCensor channel', confirmCensor.channel.name, 'currentChannel', currentChannel.name);
+      //       // setTimeout(confirmCensor.delete, 8000);
+      //       setTimeout(attemptDelete, 8000);
+      //     }
+      //   } catch (error) {
+      //     console.log('reason why this still happens: ', error);
+      //     await messageReaction.users.remove(user.id);
+      //     await confirmCensor.edit('...Alright, well if you\'d like to revisit this, let me know.');
+      //     setTimeout(attemptDelete, 8000);
+      //   }
+      // }
     })
   });
 
