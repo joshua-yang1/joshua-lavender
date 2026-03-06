@@ -104,33 +104,69 @@ for (let i = 0; i < allowedServers.length; i++) {
 
     //slash command handler
     client.on(Events.InteractionCreate, async (interaction) => {
-      if (!interaction.isChatInputCommand() && !interaction.isContextMenuCommand()) {
-        return;
-      } 
+      if (!interaction.isChatInputCommand() && !interaction.isContextMenuCommand() && !interaction.isStringSelectMenu()) return;
       if (interaction.guildId !== allowedServers[i]) {
         return;
       }
-      const command = await interaction.client.commands.get(interaction.commandName);
+      if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
+        const command = await interaction.client.commands.get(interaction.commandName);
+  
+        if (!command) {
+          console.error(`No command matching ${interaction.commandName} was found.`);
+          return;
+        }
+  
+        try {
+          await command.execute(interaction);
+        } catch (error) {
+          console.error(error);
+          if (interaction.replied || interaction.deferred) {
+            await interaction.followUp({
+              content: 'There was an error while executing this command!',
+              flags: MessageFlags.Ephemeral,
+            });
+          } else {
+            await interaction.followUp({
+              content: 'There was an error while executing this command!',
+              flags: MessageFlags.Ephemeral,
+            });
+          }
+        }
+      } else if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === 'role_select_menu') {
+          //add role ids for other restrictions here as they get added
+          const restrictedRoleIds = [
+            '1463820003408085120', //joshua lavender
+            '1468508797646405664', //crab patriarch
+            '1468478589056843972', //pookie
+            '1468491138653491345', //boywife
+            '1477028938000760842', //straight white man
+            '1476991271758463039', //quentin tarantino
+            '1476990536698036366', //big chillin'
+            '1474542978008617153', //racecar wook
+            '1474542370640101649' //cabbage vendor
+          ]
+          const selectedRoleNames = interaction.values;
+          console.log('interaction.values',interaction.values);
+          const member = interaction.member;
+          const guild = member.guild;
+          const roleIds = selectedRoleNames.map((name) => {
+            const role = guild.roles.cache.find(role => role.name === name);
+            return role ? role.id : null;
+          }).filter(id => id !== null);
 
-      if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`);
-        return;
-      }
-
-      try {
-        await command.execute(interaction);
-      } catch (error) {
-        console.error(error);
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp({
-            content: 'There was an error while executing this command!',
-            flags: MessageFlags.Ephemeral,
-          });
-        } else {
-          await interaction.followUp({
-            content: 'There was an error while executing this command!',
-            flags: MessageFlags.Ephemeral,
-          });
+          try {
+              // Add or remove roles as needed
+              // For adding all selected roles:
+              await member.roles.add(roleIds);
+              await interaction.reply({ 
+                content: `Role(s) updated successfully!`, 
+                flags: MessageFlags.Ephemeral
+              });
+          } catch (error) {
+              console.error(error);
+              await interaction.reply({ content: 'There was an error updating your roles.', flags: MessageFlags.Ephemeral });
+          }
         }
       }
     });

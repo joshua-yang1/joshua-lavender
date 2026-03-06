@@ -1,4 +1,4 @@
-import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionsBitField } from 'discord.js';
+import { ContextMenuCommandBuilder, ApplicationCommandType, PermissionsBitField, MessageFlags } from 'discord.js';
 
 export const data = new ContextMenuCommandBuilder()
     .setName('spoiler-message')
@@ -24,7 +24,7 @@ export async function execute(interaction) {
     }
     console.log('member', member);
     if (!member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
-      return interaction.reply({ content: 'You do not have permission to manage messages.', ephemeral: true });
+      return interaction.reply({ content: 'You do not have permission to manage messages.', flags: MessageFlags.Ephemeral, });
     } else {
       interaction.reply('Oh, is there a problem?')
     }
