@@ -331,12 +331,17 @@ export async function castSpell(interaction) {
       }
       const confirmation = await challenge.awaitMessageComponent({ filter, time: 1000 * 60 * 60 });
       if (confirmation.customId === 'roll') {
-          const passFailString = rolledNumber >= parseInt(spellDc) ? 'passed' : 'failed'
+          const pass = rolledNumber >= parseInt(spellDc);
+          const passFailString = pass ? 'passed' : 'failed'
           await interaction.followUp({
             content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}. ${dice[rolledNumber - 1]}`
           }).then(() => { 
             challenge.edit({components: []});
-            challenge.reply(`You passed this one with a ${rolledNumber}! Good save.`);
+            if (pass) {
+              challenge.reply(`You passed this one with a ${rolledNumber}! Good save.`);
+            } else {
+              challenge.reply(`You failed your save for this spell with a ${rolledNumber}. Perhaps invest in a Cloak of Resistance.`);
+            }
           })
       }
   } catch (error) {
