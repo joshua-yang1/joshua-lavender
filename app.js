@@ -110,7 +110,7 @@ for (let i = 0; i < allowedServers.length; i++) {
       }
       if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
         const command = await interaction.client.commands.get(interaction.commandName);
-  
+        console.log(interaction.commandName);
         if (!command) {
           console.error(`No command matching ${interaction.commandName} was found.`);
           return;
@@ -146,15 +146,22 @@ for (let i = 0; i < allowedServers.length; i++) {
             '1474542978008617153', //racecar wook
             '1474542370640101649' //cabbage vendor
           ]
-          const selectedRoleNames = interaction.values;
-          console.log('interaction.values',interaction.values);
           const member = interaction.member;
           const guild = member.guild;
-          const roleIdsAdded = selectedRoleNames.map((name) => {
-            const role = guild.roles.cache.find(role => role.name === name && !member.roles.cache.has(role.id));
-            return role ? role.id : null;
-          }).filter(id => id !== null);
-          const roleIdsRemoved = guild.roles.cache.filter(id => !roleIdsAdded.includes(id) && member.roles.cache.has(id));
+          const guildRoles = guild.roles.cache.filter(r => r.name !== "@everyone");
+          const selectedRoleNames = interaction.values;
+          console.log('interaction.values',interaction.values);
+          const memberRoleNames = member.roles.cache.filter(r => r.name !== "@everyone");
+          console.log('selected role names, member roles', selectedRoleNames, memberRoleNames)
+          const roleNamesAdded = selectedRoleNames.map((n) => {
+            if (!memberRoleNames.has(n)) return n;
+          })
+          const roleIdsAdded = roleNamesAdded.map((n) => {
+            return guildRoles.find(r => r.name === n);
+          })
+          const roleIdsRemoved = memberRoleNames.map((r) => {
+            if (!selectedRoleNames.find(n => r === n)) return r;
+          })
 
           try {
               // Add or remove roles as needed
@@ -165,13 +172,13 @@ for (let i = 0; i < allowedServers.length; i++) {
               if (roleIdsRemoved.length > 0) {
                 await member.roles.remove(roleIdsRemoved);
               }
-              await interaction.reply({ 
+              await interaction.followUp({ 
                 content: `Role(s) updated successfully!`, 
                 flags: MessageFlags.Ephemeral
               });
           } catch (error) {
               console.error(error);
-              await interaction.reply({ content: 'There was an error updating your roles.', flags: MessageFlags.Ephemeral });
+              await interaction.followUp({ content: 'There was an error updating your roles.', flags: MessageFlags.Ephemeral });
           }
         }
       }

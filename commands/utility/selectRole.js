@@ -66,6 +66,7 @@ export async function execute(interaction) {
             }
         ]
         const currentlySelectedRoles = interaction.member.roles.cache;
+        const selectedRoleNames = currentlySelectedRoles.map(r => r.name);
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('role_select_menu')
             .setPlaceholder('Lets you select your own roles.')
@@ -75,7 +76,7 @@ export async function execute(interaction) {
                 const builtOption = new StringSelectMenuOptionBuilder()
                     .setLabel(option.label)
                     .setValue(option.value);
-                if (currentlySelectedRoles.has(role => role.name === option.value)) {
+                if (selectedRoleNames.find(n => n === option.value)) {
                     builtOption.setDefault(true);
                 }
                 return builtOption;
