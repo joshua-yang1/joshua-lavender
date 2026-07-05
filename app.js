@@ -150,15 +150,21 @@ for (let i = 0; i < allowedServers.length; i++) {
           console.log('interaction.values',interaction.values);
           const member = interaction.member;
           const guild = member.guild;
-          const roleIds = selectedRoleNames.map((name) => {
-            const role = guild.roles.cache.find(role => role.name === name);
+          const roleIdsAdded = selectedRoleNames.map((name) => {
+            const role = guild.roles.cache.find(role => role.name === name && !member.roles.cache.has(role.id));
             return role ? role.id : null;
           }).filter(id => id !== null);
+          const roleIdsRemoved = restrictedRoleIds.filter(id => !roleIdsAdded.includes(id) && member.roles.cache.has(id));
 
           try {
               // Add or remove roles as needed
               // For adding all selected roles:
-              await member.roles.add(roleIds);
+              if (roleIdsAdded.length > 0) {
+                await member.roles.add(roleIdsAdded);
+              }
+              if (roleIdsRemoved.length > 0) {
+                await member.roles.remove(roleIdsRemoved);
+              }
               await interaction.reply({ 
                 content: `Role(s) updated successfully!`, 
                 flags: MessageFlags.Ephemeral
