@@ -75,21 +75,14 @@ export async function execute(interaction) {
                 const builtOption = new StringSelectMenuOptionBuilder()
                     .setLabel(option.label)
                     .setValue(option.value);
-                if (currentlySelectedRoles.has(option.value)) {
+                if (currentlySelectedRoles.has(role => role.name === option.value)) {
                     builtOption.setDefault(true);
                 }
                 return builtOption;
             }))
         const actionRow = new ActionRowBuilder()
             .addComponents(selectMenu);
-    
-        if (currentlySelectedRoles.length > 0) {
-            selectMenu.options.forEach(option => {
-                if (currentlySelectedRoles.includes(option.value)) {
-                    option.default = true;
-                }
-            });
-        }           
+        
         await interaction.reply({
             content: 'Go ahead and grab some roles for yourself. You can have as many as you want, but now that you\'re here, you need at least one of the Florida/Ohio/Internet roles just so I can sort you guys easier. Any extra stuff you need to know, just check the roles channel at #roles .',
             components: [actionRow],

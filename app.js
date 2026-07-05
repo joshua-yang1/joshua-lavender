@@ -154,7 +154,7 @@ for (let i = 0; i < allowedServers.length; i++) {
             const role = guild.roles.cache.find(role => role.name === name && !member.roles.cache.has(role.id));
             return role ? role.id : null;
           }).filter(id => id !== null);
-          const roleIdsRemoved = restrictedRoleIds.filter(id => !roleIdsAdded.includes(id) && member.roles.cache.has(id));
+          const roleIdsRemoved = guild.roles.cache.filter(id => !roleIdsAdded.includes(id) && member.roles.cache.has(id));
 
           try {
               // Add or remove roles as needed
