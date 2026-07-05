@@ -1,4 +1,4 @@
-import { MessageFlags, StringSelectMenuBuilder, ActionRowBuilder, SlashCommandBuilder } from 'discord.js';
+import { MessageFlags, StringSelectMenuBuilder, ActionRowBuilder, SlashCommandBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
     .setName('select-role')
@@ -65,17 +65,24 @@ export async function execute(interaction) {
                 value: 'Exhibitionist'
             }
         ]
-        // In your command's execute function (or a message handler):
+        const currentlySelectedRoles = interaction.member.roles.cache;
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('role_select_menu')
             .setPlaceholder('Lets you select your own roles.')
             .setMinValues(1) // Minimum number of roles a user must select
             .setMaxValues(Math.min(options.length, 25))
-            .addOptions(options)
+            .addOptions(options.map((option) => {
+                const builtOption = new StringSelectMenuOptionBuilder()
+                    .setLabel(option.label)
+                    .setValue(option.value);
+                if (currentlySelectedRoles.has(option.value)) {
+                    builtOption.setDefault(true);
+                }
+                return builtOption;
+            }))
         const actionRow = new ActionRowBuilder()
             .addComponents(selectMenu);
     
-        const currentlySelectedRoles = interaction.member.roles.cache.filter(role => options.some(option => option.value === role.name)).map(role => role.name);
         if (currentlySelectedRoles.length > 0) {
             selectMenu.options.forEach(option => {
                 if (currentlySelectedRoles.includes(option.value)) {
