@@ -159,8 +159,11 @@ for (let i = 0; i < allowedServers.length; i++) {
           const roleIdsAdded = roleNamesAdded.map((n) => {
             return guildRoles.find(r => r.name === n);
           })
-          const roleIdsRemoved = memberRoleNames.map((r) => {
+          const roleNamesRemoved = memberRoleNames.map((r) => {
             if (!selectedRoleNames.find(n => r === n)) return r;
+          })
+          const roleIdsRemoved = roleNamesRemoved.map((n) => {
+            return guildRoles.find(r => r.name = n);
           })
 
           try {
