@@ -311,6 +311,11 @@ export async function castSpell(interaction) {
   const rollButton = new ButtonBuilder().setCustomId('roll').setLabel('Roll').setStyle(ButtonStyle.Primary);
   const row = new ActionRowBuilder().addComponents(rollButton);
 
+  const hahaFuckYouButton = new ButtonBuilder().setCustomId('admin-override').setLabel('Nah. I do what I want.').setStyle(ButtonStyle.Danger);
+  const adminOverride = new ActionRowBuilder().addComponents();
+  const isAdmin = interaction.member.permissions.has(PermissionsBitField.Flags.Administrator);
+  adminOverride.addComponents(hahaFuckYouButton);
+
   const spell = interaction.options.getString('spell');
   const level = interaction.options.getString('level');
   const spellDc = spellDcs.find(dc => dc.name === level).value;
@@ -325,23 +330,35 @@ export async function castSpell(interaction) {
       content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).`,
       components: [row],
   })
+  const adminChallenge = await target.send({
+    content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}). However, you *are* an admin here. No one can see behind the DM screen, if you'd like to lie to your friends.`, 
+    components: [row, adminOverride],
+  })
+  const msgComponent = isAdmin ? adminChallenge : challenge;
   try {
       const filter = (i) => {
           return i.user.id === target.id;
       }
-      const confirmation = await challenge.awaitMessageComponent({ filter, time: 1000 * 60 * 60 });
+      const confirmation = await msgComponent.awaitMessageComponent({ filter, time: 1000 * 60 * 60 });
       if (confirmation.customId === 'roll') {
           const pass = rolledNumber >= parseInt(spellDc);
           const passFailString = pass ? 'passed' : 'failed'
           await interaction.followUp({
             content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}. ${dice[rolledNumber - 1]}`
           }).then(() => { 
-            challenge.edit({components: []});
+            msgComponent.edit({components: []});
             if (pass) {
-              challenge.reply(`You passed this one with a ${rolledNumber}! Good save.`);
+              msgComponent.reply(`You passed this one with a ${rolledNumber}! Good save.`);
             } else {
-              challenge.reply(`You failed your save for this spell with a ${rolledNumber}. Perhaps invest in a Cloak of Resistance.`);
+              msgComponent.reply(`You failed your save for this spell with a ${rolledNumber}. Perhaps invest in a Cloak of Resistance.`);
             }
+          })
+      } else if (confirmation.customId === 'admin-override') {
+          await interaction.followUp({
+            content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}... Or did they? They *are* an admin in this server... How do you know if they didn't just fudge the roll? Eh. Best not think about it. ${dice[rolledNumber - 1]}`
+          }).then(() => {
+            msgComponent.edit({components: []});
+            msgComponent.reply(`Devious. I like it. Follow your own rules. You'd make a suitable member of the Blackguard.`);
           })
       }
   } catch (error) {
@@ -349,7 +366,7 @@ export async function castSpell(interaction) {
       await interaction.followUp({
         content: `${target} has not rolled their saving throw in time and has failed, taking ${spell}'s full effects. ${dice[0]}`,
       });
-      challenge.edit({
+      msgComponent.edit({
         content: `~~Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).~~\n\nLooks like you failed to respond to this one in time.`,
         components: []
       });
