@@ -241,14 +241,20 @@ for (let i = 0; i < allowedServers.length; i++) {
       }
     });
 
-    client.on('messageCreate', (message) => {
+    client.on(Events.MessageCreate, async (message) => {
+      console.log("message create");
         // Ignore messages from bots
         if (message.author.bot || !message.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return;
-
+        console.log("allowed to see this message: ", message.author.globalName, message.content);
         // Check if the message content matches the target string
-        if (message.content.substring(0, 4) === "Grim:") {
+        if (message.content.substring(0, 5) === "Grim:") {
           const joshuaMessage = message.content.slice(5);
-            message.reply(joshuaMessage);
+          try {
+            await message.channel.send(joshuaMessage);
+            await message.delete();
+          } catch (err) {
+            console.error("Failed to send/delete message:", err);
+          }
         }
     });
 
