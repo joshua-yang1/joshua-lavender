@@ -74,10 +74,9 @@ function numberToWords(n) {
     return result.trim();
 }
 
-async function getMember(guild, memberId) {
+export async function getMember(guild, memberId) {
     try {
         const member = await guild.members.fetch(memberId);
-        console.log(`Fetched member: ${member.user.tag}`);
         return member;
     } catch (error) {
         console.error('Could not fetch member:', error);

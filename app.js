@@ -17,7 +17,7 @@ import  { Player } from 'discord-player';
 import  { DefaultExtractors } from '@discord-player/extractor';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
 import savedEvents from './savedEvents.json' with { type: "json" };
-import { deployCommandsToServer, scheduleEventOnBoot, writeCommandsToClient } from './utils.js';
+import { deployCommandsToServer, scheduleEventOnBoot, writeCommandsToClient, getMember } from './utils.js';
 
 const token = process.env.DISCORD_TOKEN;
 const serverIds = process.env.SERVER_ID;
@@ -134,7 +134,6 @@ for (let i = 0; i < allowedServers.length; i++) {
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === 'role_select_menu') {
-          //add role ids for other restrictions here as they get added
           const restrictedRoleIds = [
             '1463820003408085120', //joshua lavender
             '1468508797646405664', //crab patriarch
@@ -144,44 +143,41 @@ for (let i = 0; i < allowedServers.length; i++) {
             '1476991271758463039', //quentin tarantino
             '1476990536698036366', //big chillin'
             '1474542978008617153', //racecar wook
-            '1474542370640101649' //cabbage vendor
-          ]
+            '1474542370640101649'  //cabbage vendor
+          ];
+
           const member = interaction.member;
-          const guild = member.guild;
+          const guild = interaction.guild;
           const guildRoles = guild.roles.cache.filter(r => r.name !== "@everyone");
-          const selectedRoleNames = interaction.values;
-          console.log('interaction.values',interaction.values);
-          const memberRoleNames = member.roles.cache.filter(r => r.name !== "@everyone");
-          console.log('selected role names, member roles', selectedRoleNames, memberRoleNames)
-          const roleNamesAdded = selectedRoleNames.map((n) => {
-            if (!memberRoleNames.has(n)) return n;
-          })
-          const roleIdsAdded = roleNamesAdded.map((n) => {
-            return guildRoles.find(r => r.name === n);
-          })
-          const roleNamesRemoved = memberRoleNames.map((r) => {
-            if (!selectedRoleNames.find(n => r === n)) return r;
-          })
-          const roleIdsRemoved = roleNamesRemoved.map((n) => {
-            return guildRoles.find(r => r.name = n);
-          })
+          const selectedRoleNames = interaction.values; // strings
+          const memberRoles = member.roles.cache.filter(r => r.name !== "@everyone"); // Collection<Role>
+
+          // Roles to add: selected names the member doesn't already have
+          const rolesToAdd = selectedRoleNames
+            .filter(n => !memberRoles.some(r => r.name === n))
+            .map(n => guildRoles.find(r => r.name === n))
+            .filter(Boolean);
+
+          // Roles to remove: current roles that weren't in the new selection
+          const rolesToRemove = memberRoles.filter(r => !selectedRoleNames.includes(r.name));
 
           try {
-              // Add or remove roles as needed
-              // For adding all selected roles:
-              if (roleIdsAdded.length > 0) {
-                await member.roles.add(roleIdsAdded);
-              }
-              if (roleIdsRemoved.length > 0) {
-                await member.roles.remove(roleIdsRemoved);
-              }
-              await interaction.followUp({ 
-                content: `Role(s) updated successfully!`, 
-                flags: MessageFlags.Ephemeral
-              });
+            if (rolesToAdd.length > 0) {
+              await member.roles.add(rolesToAdd);
+            }
+            if (rolesToRemove.size > 0) {
+              await member.roles.remove(rolesToRemove);
+            }
+            await interaction.followUp({
+              content: `Role(s) updated successfully!`,
+              flags: MessageFlags.Ephemeral
+            });
           } catch (error) {
-              console.error(error);
-              await interaction.followUp({ content: 'There was an error updating your roles.', flags: MessageFlags.Ephemeral });
+            console.error(error);
+            await interaction.followUp({
+              content: 'There was an error updating your roles.',
+              flags: MessageFlags.Ephemeral
+            });
           }
         }
       }
