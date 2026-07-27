@@ -241,6 +241,17 @@ for (let i = 0; i < allowedServers.length; i++) {
       }
     });
 
+    client.on('messageCreate', (message) => {
+        // Ignore messages from bots
+        if (message.author.bot || !message.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return;
+
+        // Check if the message content matches the target string
+        if (message.content.substring(0, 4) === "Grim:") {
+          const joshuaMessage = message.content.slice(5);
+            message.reply(joshuaMessage);
+        }
+    });
+
     //add emoji-related commands here. choppingblock censors posts by deleting the original and reposting it with spoiler
     client.on(Events.MessageReactionAdd, async (messageReaction, user) => {
       // if (messageReaction.emoji.name === 'choppingblock') {
