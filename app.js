@@ -72,12 +72,12 @@ for (let i = 0; i < allowedServers.length; i++) {
         } catch (error) {
           console.error(error);
           if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
+            await interaction.reply({
               content: 'There was an error while executing this command!',
               flags: MessageFlags.Ephemeral,
             });
           } else {
-            await interaction.followUp({
+            await interaction.reply({
               content: 'There was an error while executing this command!',
               flags: MessageFlags.Ephemeral,
             });
@@ -119,13 +119,13 @@ for (let i = 0; i < allowedServers.length; i++) {
             if (rolesToRemove.size > 0) {
               await member.roles.remove(rolesToRemove);
             }
-            await interaction.followUp({
+            await interaction.reply({
               content: `Role(s) updated successfully!`,
               flags: MessageFlags.Ephemeral
             });
           } catch (error) {
             console.error(error);
-            await interaction.followUp({
+            await interaction.reply({
               content: 'There was an error updating your roles.',
               flags: MessageFlags.Ephemeral
             });
