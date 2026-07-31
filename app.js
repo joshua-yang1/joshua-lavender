@@ -85,50 +85,29 @@ for (let i = 0; i < allowedServers.length; i++) {
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === 'role_select_menu') {
-          const restrictedRoleIds = [
-            '1463820003408085120', //joshua lavender
-            '1468508797646405664', //crab patriarch
-            '1468478589056843972', //pookie
-            '1468491138653491345', //boywife
-            '1477028938000760842', //straight white man
-            '1476991271758463039', //quentin tarantino
-            '1476990536698036366', //big chillin'
-            '1474542978008617153', //racecar wook
-            '1474542370640101649'  //cabbage vendor
-          ];
+          const selectMenuComponent = interaction.message.components[0].components[0];
+          const assignableRoleNames = selectMenuComponent.options.map(o => o.value);
 
           const member = interaction.member;
           const guild = interaction.guild;
           const guildRoles = guild.roles.cache.filter(r => r.name !== "@everyone");
-          const selectedRoleNames = interaction.values; // strings
-          const memberRoles = member.roles.cache.filter(r => r.name !== "@everyone"); // Collection<Role>
+          const selectedRoleNames = interaction.values;
+          const memberAssignableRoles = member.roles.cache.filter(r => assignableRoleNames.includes(r.name));
 
-          // Roles to add: selected names the member doesn't already have
           const rolesToAdd = selectedRoleNames
-            .filter(n => !memberRoles.some(r => r.name === n))
+            .filter(n => !memberAssignableRoles.some(r => r.name === n))
             .map(n => guildRoles.find(r => r.name === n))
             .filter(Boolean);
 
-          // Roles to remove: current roles that weren't in the new selection
-          const rolesToRemove = memberRoles.filter(r => !selectedRoleNames.includes(r.name));
+          const rolesToRemove = memberAssignableRoles.filter(r => !selectedRoleNames.includes(r.name));
 
           try {
-            if (rolesToAdd.length > 0) {
-              await member.roles.add(rolesToAdd);
-            }
-            if (rolesToRemove.size > 0) {
-              await member.roles.remove(rolesToRemove);
-            }
-            await interaction.reply({
-              content: `Role(s) updated successfully!`,
-              flags: MessageFlags.Ephemeral
-            });
+            if (rolesToAdd.length > 0) await member.roles.add(rolesToAdd);
+            if (rolesToRemove.size > 0) await member.roles.remove(rolesToRemove);
+            await interaction.reply({ content: 'Role(s) updated successfully!', flags: MessageFlags.Ephemeral });
           } catch (error) {
             console.error(error);
-            await interaction.reply({
-              content: 'There was an error updating your roles.',
-              flags: MessageFlags.Ephemeral
-            });
+            await interaction.reply({ content: 'There was an error updating your roles.', flags: MessageFlags.Ephemeral });
           }
         }
       }
