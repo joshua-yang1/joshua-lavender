@@ -3,7 +3,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Collection, REST, Routes, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { Collection, REST, Routes, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField } from 'discord.js';
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
@@ -165,10 +165,10 @@ export async function scheduleEventOnBoot(client, savedEvent, serverId) {
     })
 
     try {
-        if (daysBefore % 1 !== 0) return channel.send({ 
+        if (daysBefore % 1 !== 0) return channel.send({
           content: "I can't calculate fractions of a day. That's a little too much guesswork. Please enter a number of days.",
           flags: MessageFlags.Ephemeral,
-        }); 
+        });
 
         // Calculate 3 days before
         const milliseconds = daysBefore * 24 * 60 * 60 * 1000; // milliseconds in 3 days
@@ -260,7 +260,7 @@ export async function deployCommandsToServer() {
       allowedServers.forEach(async (server) => {
         // The put method is used to fully refresh all commands in the guild with the current set
         const data = await rest.put(Routes.applicationGuildCommands(clientId, server), { body: commands });
-  
+
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
         console.log(data);
       })
@@ -330,7 +330,7 @@ export async function castSpell(interaction) {
       components: [row],
   })
   const adminChallenge = await target.send({
-    content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}). However, you *are* an admin here. No one can see behind the DM screen, if you'd like to lie to your friends.`, 
+    content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}). However, you *are* an admin here. No one can see behind the DM screen, if you'd like to lie to your friends.`,
     components: [row, adminOverride],
   })
   const msgComponent = isAdmin ? adminChallenge : challenge;
@@ -344,7 +344,7 @@ export async function castSpell(interaction) {
           const passFailString = pass ? 'passed' : 'failed'
           await interaction.followUp({
             content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}. ${dice[rolledNumber - 1]}`
-          }).then(() => { 
+          }).then(() => {
             msgComponent.edit({components: []});
             if (pass) {
               msgComponent.reply(`You passed this one with a ${rolledNumber}! Good save.`);
