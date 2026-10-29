@@ -3,7 +3,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Collection, REST, Routes, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField } from 'discord.js';
+import { Collection, REST, Routes, MessageFlags, ButtonBuilder, ButtonStyle, ActionRowBuilder, TextInputBuilder, PermissionsBitField } from 'discord.js';
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
