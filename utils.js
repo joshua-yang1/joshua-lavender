@@ -353,12 +353,44 @@ export async function castSpell(interaction) {
             }
           })
       } else if (confirmation.customId === 'admin-override') {
-          await interaction.followUp({
-            content: `${target} has rolled a ${rolledNumber} and has ${passFailString} their saving throw against ${spell}... Or did they? They *are* an admin in this server... How do you know if they didn't just fudge the roll? Eh. Best not think about it. ${dice[rolledNumber - 1]}`
-          }).then(() => {
-            msgComponent.edit({components: []});
-            msgComponent.reply(`Devious. I like it. Follow your own rules. You'd make a suitable member of the Blackguard.`);
-          })
+        // showModal must be the FIRST response to this button interaction
+        const modal = new ModalBuilder()
+            .setCustomId('fudged_roll_modal')
+            .setTitle('Fudge Your Roll');
+    
+        const input = new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+                .setCustomId('fudged_number')
+                .setLabel('Your "rolled" number (1-20)')
+                .setStyle(TextInputStyle.Short)
+                .setRequired(true)
+        );
+        modal.addComponents(input);
+    
+        await confirmation.showModal(modal);
+    
+        const submission = await confirmation.awaitModalSubmit({
+            filter: (i) => i.user.id === target.id && i.customId === 'fudged_roll_modal',
+            time: 1000 * 60 * 60,
+        }).catch(() => null);
+    
+        if (!submission) return; // user dismissed the modal
+    
+        const fudgedNumber = parseInt(submission.fields.getTextInputValue('fudged_number'));
+    
+        if (isNaN(fudgedNumber) || fudgedNumber < 1 || fudgedNumber > 20) {
+            return submission.reply({ content: '⚠️ Enter a number between 1 and 20.', ephemeral: true });
+        }
+    
+        const pass = fudgedNumber >= parseInt(spellDc);
+        const passFailString = pass ? 'passed' : 'failed';
+    
+        await submission.reply({
+            content: `${target} has rolled a ${fudgedNumber} and has ${passFailString} their saving throw against ${spell}... Or did they? They *are* an admin in this server... How do you know if they didn't just fudge the roll? Eh. Best not think about it. ${dice[fudgedNumber - 1]}`,
+        });
+    
+        await msgComponent.edit({ components: [] });
+        await msgComponent.reply(`Devious. I like it. Follow your own rules. You'd make a suitable member of the Blackguard.`);
       }
   } catch (error) {
       console.log('coward: ', error);
