@@ -383,7 +383,7 @@ export async function castSpell(interaction) {
         const pass = fudgedNumber >= parseInt(spellDc);
         const passFailString = pass ? 'passed' : 'failed';
 
-        await submission.reply({
+        await interaction.reply({
             content: `${target} has rolled a ${fudgedNumber} and has ${passFailString} their saving throw against ${spell}... Or did they? They *are* an admin in this server... How do you know if they didn't just fudge the roll? Eh. Best not think about it. ${dice[fudgedNumber - 1]}`,
         });
 
