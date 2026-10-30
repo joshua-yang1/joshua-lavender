@@ -1,5 +1,5 @@
 // Require the necessary discord.js classes
-import { 
+import {
   Client,
   Collection,
   Events,
@@ -25,7 +25,7 @@ for (let i = 0; i < allowedServers.length; i++) {
   const PORT = process.env.PORT + i || 3000 + i;
 
   // Create a new client instance
-  const client = new Client({ 
+  const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,         // For server-related events (joins, leaves)
         GatewayIntentBits.GuildMessages,  // For messages in servers
@@ -47,7 +47,6 @@ for (let i = 0; i < allowedServers.length; i++) {
   // It makes some properties non-nullable.
   client.once(Events.ClientReady, async (readyClient) => {
     console.log(`Ready! Logged in as ${readyClient.user.tag} on port ${PORT + i}`);
-    console.log(savedEvents);
     //reschedules any events in savedEvents.json in case of a bot restart
     savedEvents.forEach((se) => {
       scheduleEventOnBoot(client, se, allowedServers[i]);
@@ -66,7 +65,7 @@ for (let i = 0; i < allowedServers.length; i++) {
           console.error(`No command matching ${interaction.commandName} was found.`);
           return;
         }
-  
+
         try {
           await command.execute(interaction);
         } catch (error) {
@@ -125,7 +124,7 @@ for (let i = 0; i < allowedServers.length; i++) {
       const currentNickname = joiner.nickname || joiner.user.globalName || false;
       console.log('current nickname: ',currentNickname);
       const guild = joiner.guild;
-      const stashRole = currentNickname ? guild.roles.cache.find(role => role.name === `[stash]${currentNickname}`) : false; 
+      const stashRole = currentNickname ? guild.roles.cache.find(role => role.name === `[stash]${currentNickname}`) : false;
       console.log('stashed role?: ', stashRole);
 
       //check user's current roles
@@ -245,7 +244,7 @@ for (let i = 0; i < allowedServers.length; i++) {
       //       flags: MessageFlags.Ephemeral,
       //       withResponse: true,
       //     }
-      //   ); 
+      //   );
       //   async function attemptDelete() {
       //     if (confirmCensor.channel) {
       //       await confirmCensor.delete();

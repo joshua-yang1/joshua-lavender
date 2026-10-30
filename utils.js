@@ -262,7 +262,6 @@ export async function deployCommandsToServer() {
         const data = await rest.put(Routes.applicationGuildCommands(clientId, server), { body: commands });
 
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-        console.log(data);
       })
     } catch (error) {
       // And of course, make sure you catch and log any errors!
