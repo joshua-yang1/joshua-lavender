@@ -325,15 +325,13 @@ export async function castSpell(interaction) {
       content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).`,
       withResponse: true,
   });
-  const challenge = await target.send({
-      content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).`,
-      components: [row],
-  })
-  const adminChallenge = await target.send({
+  const msgComponent = isAdmin ? await target.send({
     content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}). However, you *are* an admin here. No one can see behind the DM screen, if you'd like to lie to your friends.`,
     components: [row, adminOverride],
-  })
-  const msgComponent = isAdmin ? adminChallenge : challenge;
+  }) : await target.send({
+      content: `Hey ${target}, ${interaction.user.displayName} has cast ${spell} at ${level}. Please roll your saving throw (Save DC: ${spellDc}).`,
+      components: [row],
+  });
   try {
       const filter = (i) => {
           return i.user.id === target.id;
@@ -357,7 +355,7 @@ export async function castSpell(interaction) {
         const modal = new ModalBuilder()
             .setCustomId('fudged_roll_modal')
             .setTitle('Fudge Your Roll');
-    
+
         const input = new ActionRowBuilder().addComponents(
             new TextInputBuilder()
                 .setCustomId('fudged_number')
@@ -366,29 +364,29 @@ export async function castSpell(interaction) {
                 .setRequired(true)
         );
         modal.addComponents(input);
-    
+
         await confirmation.showModal(modal);
-    
+
         const submission = await confirmation.awaitModalSubmit({
             filter: (i) => i.user.id === target.id && i.customId === 'fudged_roll_modal',
             time: 1000 * 60 * 60,
         }).catch(() => null);
-    
+
         if (!submission) return; // user dismissed the modal
-    
+
         const fudgedNumber = parseInt(submission.fields.getTextInputValue('fudged_number'));
-    
+
         if (isNaN(fudgedNumber) || fudgedNumber < 1 || fudgedNumber > 20) {
             return submission.reply({ content: '⚠️ Enter a number between 1 and 20.', ephemeral: true });
         }
-    
+
         const pass = fudgedNumber >= parseInt(spellDc);
         const passFailString = pass ? 'passed' : 'failed';
-    
+
         await submission.reply({
             content: `${target} has rolled a ${fudgedNumber} and has ${passFailString} their saving throw against ${spell}... Or did they? They *are* an admin in this server... How do you know if they didn't just fudge the roll? Eh. Best not think about it. ${dice[fudgedNumber - 1]}`,
         });
-    
+
         await msgComponent.edit({ components: [] });
         await msgComponent.reply(`Devious. I like it. Follow your own rules. You'd make a suitable member of the Blackguard.`);
       }
